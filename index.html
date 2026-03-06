@@ -10,56 +10,107 @@ background:#0b0e11;
 color:white;
 font-family:Arial;
 text-align:center;
-padding:40px;
+padding:20px;
 }
 
 h1{
-color:#f0b90b;
+color:#F0B90B;
 }
 
 .box{
 background:#11161d;
-padding:30px;
-margin:auto;
-max-width:600px;
+padding:20px;
+margin:20px auto;
+max-width:800px;
 border-radius:10px;
 }
 
 input{
-width:80%;
 padding:10px;
-margin-top:10px;
+width:70%;
 }
 
 button{
 padding:10px 20px;
-background:#f0b90b;
+background:#F0B90B;
 border:none;
-margin-top:10px;
 cursor:pointer;
+margin-top:10px;
+}
+
+#loader{
+display:none;
+border:6px solid #333;
+border-top:6px solid #F0B90B;
+border-radius:50%;
+width:40px;
+height:40px;
+animation:spin 1s linear infinite;
+margin:20px auto;
+}
+
+@keyframes spin{
+0%{transform:rotate(0deg);}
+100%{transform:rotate(360deg);}
+}
+
+.coin{
+margin:8px;
+}
+
+.green{
+color:#00ff9d;
+}
+
+.red{
+color:#ff4d4d;
 }
 
 </style>
-
 </head>
 
 <body>
 
 <h1>Binance AI Guardian</h1>
-
-<p>AI Scam Detection & Trading Assistant</p>
+<p>AI Scam Detection & Market Intelligence Tool</p>
 
 <div class="box">
 
 <h3>Token Risk Scanner</h3>
 
-<input id="token" placeholder="Enter Token Name">
+<input id="token" placeholder="Enter Token (BTC / ETH / PEPE)">
 
 <br>
 
 <button onclick="scan()">Scan Token</button>
 
+<div id="loader"></div>
+
 <div id="result"></div>
+
+</div>
+
+<div class="box">
+
+<h3>Market Sentiment</h3>
+
+<p id="sentiment">Loading market sentiment...</p>
+
+</div>
+
+<div class="box">
+
+<h3>Trending Crypto Prices</h3>
+
+<div id="prices"></div>
+
+</div>
+
+<div class="box">
+
+<h3>Market Trend</h3>
+
+<div id="trend"></div>
 
 </div>
 
@@ -71,11 +122,18 @@ return list[Math.floor(Math.random()*list.length)];
 
 function scan(){
 
+document.getElementById("loader").style.display="block";
+document.getElementById("result").innerHTML="";
+
+setTimeout(()=>{
+
+document.getElementById("loader").style.display="none";
+
 let trust=[
 "AI Trust Score: 82%",
-"AI Trust Score: 67%",
+"AI Trust Score: 65%",
 "AI Trust Score: 41%",
-"AI Trust Score: 90%"
+"AI Trust Score: 91%"
 ];
 
 let liquidity=[
@@ -85,15 +143,22 @@ let liquidity=[
 ];
 
 let whale=[
-"Whale Wallet Control: Low",
-"Whale Wallet Control: Medium",
-"Whale Wallet Control: High"
+"Whale Activity: Low",
+"Whale Activity: Medium",
+"Whale Activity: High"
 ];
 
 let contract=[
 "Contract Safety: Safe",
-"Contract Safety: Moderate Risk",
-"Contract Safety: High Risk"
+"Contract Risk: Moderate",
+"Contract Risk: High"
+];
+
+let alert=[
+"No scam pattern detected",
+"Unusual whale movement detected",
+"Possible rug pull pattern",
+"Suspicious trading activity"
 ];
 
 document.getElementById("result").innerHTML=
@@ -101,9 +166,91 @@ document.getElementById("result").innerHTML=
 random(trust)+"<br>"+
 random(liquidity)+"<br>"+
 random(whale)+"<br>"+
-random(contract);
+random(contract)+"<br><br>"+
+"AI Alert: "+random(alert);
+
+},2000);
 
 }
+
+async function loadPrices(){
+
+let url="https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&page=1";
+
+let res=await fetch(url);
+let data=await res.json();
+
+let html="";
+
+data.forEach(c=>{
+
+let color=c.price_change_percentage_24h>0?"green":"red";
+
+html+=`
+<div class="coin">
+${c.name} : $${c.current_price}
+<span class="${color}">
+(${c.price_change_percentage_24h.toFixed(2)}%)
+</span>
+</div>
+`;
+
+});
+
+document.getElementById("prices").innerHTML=html;
+
+}
+
+async function marketSentiment(){
+
+let url="https://api.coingecko.com/api/v3/global";
+
+let res=await fetch(url);
+let data=await res.json();
+
+let change=data.data.market_cap_change_percentage_24h_usd;
+
+let sentiment="Neutral";
+
+if(change>1) sentiment="Bullish 📈";
+if(change<-1) sentiment="Bearish 📉";
+
+document.getElementById("sentiment").innerText=
+"Market Sentiment: "+sentiment+
+" | Market Cap Change: "+change.toFixed(2)+"%";
+
+}
+
+async function marketTrend(){
+
+let url="https://api.coingecko.com/api/v3/search/trending";
+
+let res=await fetch(url);
+let data=await res.json();
+
+let html="";
+
+data.coins.slice(0,5).forEach(c=>{
+
+html+=`
+<div>
+🔥 ${c.item.name}
+</div>
+`;
+
+});
+
+document.getElementById("trend").innerHTML=html;
+
+}
+
+loadPrices();
+marketSentiment();
+marketTrend();
+
+setInterval(loadPrices,20000);
+setInterval(marketSentiment,20000);
+setInterval(marketTrend,20000);
 
 </script>
 
