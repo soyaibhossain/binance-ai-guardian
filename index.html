@@ -9,25 +9,21 @@
 body {
     margin:0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background:#0b0e11;
+    background:#1E1E2F; /* dark but friendly, Binance-style */
     color:white;
 }
 header {
-    background:#11161d;
+    background:#F0B90B;
+    color:#1E1E2F;
     padding:25px;
     text-align:center;
-    border-bottom:3px solid #F0B90B;
+    font-weight:bold;
+    border-bottom:2px solid #DDD;
 }
-h1 {
-    color:#F0B90B;
-    margin:0;
-}
-h2 {
-    color:#F0B90B;
-    margin-bottom:10px;
-}
+h1 {margin:0;}
+h2 {color:#F0B90B;margin-bottom:10px;}
 
-/* Container */
+/* Container & Grid */
 .container {
     max-width:1200px;
     margin:auto;
@@ -37,19 +33,20 @@ h2 {
     gap:20px;
 }
 
-/* Sections */
+/* Section Cards */
 .section {
-    background:#11161d;
+    background:#2B2B3F;
     padding:25px;
     border-radius:12px;
     min-height:200px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
 
 /* Scanner Box */
 #scannerBox {
     grid-column: span 2;
     text-align:center;
-    background:#0f141a;
+    background:#32334F;
 }
 input {
     padding:12px;
@@ -69,7 +66,7 @@ button {
 #loader {
     display:none;
     margin:20px auto;
-    border:6px solid #333;
+    border:6px solid #444;
     border-top:6px solid #F0B90B;
     border-radius:50%;
     width:50px;
@@ -81,28 +78,27 @@ button {
     100%{transform:rotate(360deg);}
 }
 
-/* Market/Coins */
-.coin {
-    margin:8px 0;
+/* Coins / Market Items */
+.coin, .trend-coin {
+    margin:10px 0;
     display:flex;
     justify-content:space-between;
+    font-weight:bold;
 }
-.green {color:#00ff9d;}
-.red {color:#ff4d4d;}
+.green {color:#00FF9D;}
+.red {color:#FF4D4D;}
+.neutral {color:#DDD;}
 
-/* Trusted Text */
 .trusted {
-    margin-top:15px;
-    font-size:14px;
-    color:#aaa;
+    margin-top:10px;
+    font-size:13px;
+    color:#AAA;
     font-style:italic;
 }
 
 /* Responsive */
 @media(max-width:900px){
-    .container{
-        grid-template-columns:1fr;
-    }
+    .container{grid-template-columns:1fr;}
 }
 </style>
 </head>
@@ -110,7 +106,7 @@ button {
 
 <header>
 <h1>Binance AI Guardian</h1>
-<p>Trusted AI-powered Crypto Risk Scanner & Market Intelligence</p>
+<p>Finance-focused Crypto Analysis | Trusted by Binance ecosystem</p>
 </header>
 
 <div class="container">
@@ -119,28 +115,28 @@ button {
     <div class="section">
         <h2>Market Sentiment</h2>
         <p id="sentiment">Loading market sentiment...</p>
-        <p class="trusted">Analysis powered & trusted by Binance ecosystem data</p>
+        <p class="trusted">Live market analysis based on global crypto metrics</p>
     </div>
 
-    <!-- Top Trending Coins -->
+    <!-- Market Overview -->
     <div class="section">
-        <h2>Top Trending Coins</h2>
-        <div id="trend"></div>
-        <p class="trusted">Trending crypto based on live market data</p>
+        <h2>Market Overview</h2>
+        <div id="trendCap">Loading market overview...</div>
+        <p class="trusted">Trusted financial metrics connected to Binance ecosystem</p>
     </div>
 
     <!-- Live Prices -->
     <div class="section">
         <h2>Live Crypto Prices</h2>
         <div id="prices"></div>
-        <p class="trusted">Live market prices & price changes (24h)</p>
+        <p class="trusted">Top coins, 24h changes & live updates</p>
     </div>
 
-    <!-- Market Overview / Cap -->
+    <!-- Top Trending Coins -->
     <div class="section">
-        <h2>Market Overview</h2>
-        <div id="trendCap">Loading market overview...</div>
-        <p class="trusted">AI Finance Analysis connected to live market metrics</p>
+        <h2>Top Trending Coins</h2>
+        <div id="trend"></div>
+        <p class="trusted">Trending tokens with real-time market indicators</p>
     </div>
 
     <!-- Token Risk Scanner -->
@@ -150,7 +146,7 @@ button {
         <button onclick="scanToken()">Scan</button>
         <div id="loader"></div>
         <div id="result" style="margin-top:15px;"></div>
-        <p class="trusted">Trusted AI analysis, Binance-approved methodology</p>
+        <p class="trusted">AI-powered analysis, trusted by Binance methodology</p>
     </div>
 
 </div>
@@ -159,7 +155,7 @@ button {
 // Utility
 function random(list){ return list[Math.floor(Math.random()*list.length)]; }
 
-// Scanner
+// Token Risk Scanner
 function scanToken(){
     document.getElementById("loader").style.display="block";
     document.getElementById("result").innerHTML="";
@@ -182,7 +178,7 @@ function scanToken(){
     },2000);
 }
 
-// Live Prices
+// Load Live Prices
 async function loadPrices(){
     let url="https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&page=1";
     let res=await fetch(url);
@@ -208,18 +204,6 @@ async function marketSentiment(){
         `Market Sentiment: ${sentiment} | Market Cap Change: ${change.toFixed(2)}%`;
 }
 
-// Trending Coins
-async function marketTrend(){
-    let url="https://api.coingecko.com/api/v3/search/trending";
-    let res=await fetch(url);
-    let data=await res.json();
-    let html="";
-    data.coins.slice(0,5).forEach(c=>{
-        html+=`<div>🔥 ${c.item.name}</div>`;
-    });
-    document.getElementById("trend").innerHTML=html;
-}
-
 // Market Overview
 async function marketOverview(){
     let url="https://api.coingecko.com/api/v3/global";
@@ -229,6 +213,18 @@ async function marketOverview(){
     html+=`24h Volume: $${(data.data.total_volume.usd/1e9).toFixed(2)}B<br>`;
     html+=`BTC Dominance: ${data.data.market_cap_percentage.btc.toFixed(2)}%`;
     document.getElementById("trendCap").innerHTML=html;
+}
+
+// Trending Coins
+async function marketTrend(){
+    let url="https://api.coingecko.com/api/v3/search/trending";
+    let res=await fetch(url);
+    let data=await res.json();
+    let html="";
+    data.coins.slice(0,5).forEach(c=>{
+        html+=`<div class="trend-coin">🔥 ${c.item.name} <span class="neutral">Market Cap: $${(c.item.market_cap/1e6).toFixed(1)}M</span></div>`;
+    });
+    document.getElementById("trend").innerHTML=html;
 }
 
 // Initial Load
@@ -242,8 +238,7 @@ setInterval(loadPrices,20000);
 setInterval(marketSentiment,20000);
 setInterval(marketTrend,20000);
 setInterval(marketOverview,20000);
-
 </script>
 
 </body>
-        </html>
+</html>
